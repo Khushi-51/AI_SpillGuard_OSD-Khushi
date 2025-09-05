@@ -1,0 +1,2 @@
+dataset_type,train_samples,val_samples,test_samples,classes,class_distribution,total_samples
+classification,1622,406,508,"['images', 'masks']","{'images': 1268, 'masks': 1268}",2536
