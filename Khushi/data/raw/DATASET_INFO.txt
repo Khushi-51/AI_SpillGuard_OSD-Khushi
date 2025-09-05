@@ -1,0 +1,15 @@
+SAMPLE DATASET CREATED
+==================================================
+
+This is a synthetic dataset created for testing purposes.
+To use your own dataset:
+
+1. Replace the contents of data/raw/images/ with your satellite images
+2. Replace the contents of data/raw/masks/ with corresponding oil spill masks
+3. Supported formats: .jpg, .jpeg, .png, .tif, .tiff
+4. Ensure image and mask filenames match (except extension)
+
+Dataset Sources:
+- Kaggle: https://www.kaggle.com/datasets/sudhanshu2198/oil-spill-detection
+- ESA Copernicus: https://scihub.copernicus.eu/
+- NASA Earth Data: https://earthdata.nasa.gov/
