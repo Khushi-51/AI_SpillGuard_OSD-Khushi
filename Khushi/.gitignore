@@ -52,3 +52,22 @@ Thumbs.db
 # Logs
 *.log
 logs/
+# Ignore datasets
+data/
+dataset/
+
+# Ignore VSCode settings
+.vscode/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore large model checkpoints
+*.h5
+*.pth
+*.pt
+*.ckpt
+
+# Ignore notebook checkpoints
+.ipynb_checkpoints/

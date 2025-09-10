@@ -1,0 +1,4 @@
+,split,total_images,spill_images,non_spill_images,spill_percentage,avg_spill_area,median_spill_area
+train,train,811,811,0,100.0,95.37865819747223,96.82556905864197
+val,val,203,203,0,100.0,95.86782694338068,97.14887152777779
+test,test,254,254,0,100.0,95.9548016422468,96.87542477908845

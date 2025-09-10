@@ -1,0 +1,4 @@
+,images,masks,missing_masks,images_pct,masks_pct
+train,811,811,0,63.96,63.96
+val,203,203,0,16.01,16.01
+test,254,254,0,20.03,20.03
