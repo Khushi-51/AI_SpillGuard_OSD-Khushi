@@ -1,0 +1,14 @@
+{
+  "image_size": 256,
+  "batch_size": 2,
+  "num_classes": 1,
+  "device": "cpu",
+  "model_name": "UNet",
+  "n_channels": 3,
+  "n_classes": 1,
+  "total_parameters": 31037633,
+  "trainable_parameters": 31037633,
+  "loss_function": "BCE_Dice_Combined",
+  "bce_weight": 0.5,
+  "dice_weight": 0.5
+}
