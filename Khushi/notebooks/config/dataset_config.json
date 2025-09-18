@@ -1,0 +1,18 @@
+{
+  "image_size": 256,
+  "batch_size": 2,
+  "num_workers": 0,
+  "pin_memory": false,
+  "data_paths": {
+    "train_images": "../data/processed/train/images",
+    "train_masks": "../data/processed/train/masks",
+    "val_images": "../data/processed/val/images",
+    "val_masks": "../data/processed/val/masks",
+    "test_images": "../data/processed/test/images",
+    "test_masks": "../data/processed/test/masks"
+  },
+  "train_samples": 811,
+  "val_samples": 203,
+  "train_loader_working": true,
+  "val_loader_working": true
+}
