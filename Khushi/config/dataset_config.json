@@ -1,0 +1,31 @@
+{
+  "config": {
+    "image_size": 512,
+    "batch_size": 4,
+    "num_workers": 0,
+    "pin_memory": false,
+    "shuffle_train": true,
+    "shuffle_val": false,
+    "shuffle_test": false,
+    "prefetch_factor": 2,
+    "persistent_workers": false
+  },
+  "available_splits": [
+    "train",
+    "val",
+    "test"
+  ],
+  "dataset_sizes": {
+    "train": 500,
+    "val": 100,
+    "test": 50
+  },
+  "corrupted_files": [],
+  "label_encoder": {
+    "class_names": [
+      "Non-Oil",
+      "Oil"
+    ],
+    "num_classes": 2
+  }
+}
