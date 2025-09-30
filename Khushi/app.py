@@ -16,6 +16,8 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import gdown
 
+print("NumPy version:", np.__version__)
+print("Torch sees NumPy:", torch.tensor([1.0,2.0]).numpy())
 
 
 file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
