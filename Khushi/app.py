@@ -12,6 +12,13 @@ from PIL import Image
 import numpy as np
 from io import BytesIO
 
+file_id = "https://drive.google.com/file/d/1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR/view?usp=sharing"  
+output_path = "best_unet_oilspill.pth"
+
+if not os.path.exists(output_path):
+    url = f"https://drive.google.com/uc?id={file_id}"
+    gdown.download(url, output_path, quiet=False)
+
 # --- UNet Model Architecture (same as training) ---
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -80,7 +87,7 @@ class UNet(nn.Module):
 # --- Load Model ---
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(n_channels=3, n_classes=1).to(device)
-model.load_state_dict(torch.load('notebooks/results/best_unet_oilspill.pth', map_location=device))  # <--- update path if needed
+model.load_state_dict(torch.load(output_path, map_location="cpu"))  # <--- update path if needed
 model.eval()
 
 # --- Helper function: Overlay mask on image ---
