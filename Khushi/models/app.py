@@ -1,3 +1,10 @@
+
+import os
+os.environ["TORCH_DISTRIBUTED_DEBUG"] = "OFF"
+os.environ["MASTER_ADDR"] = "localhost"
+os.environ["MASTER_PORT"] = "29500"
+
+
 import streamlit as st
 import torch
 import torch.nn as nn
@@ -98,9 +105,9 @@ def predict_mask(pil_img, image_size=256):
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
-    st.image(img, caption="Uploaded Image", use_column_width=True)
+    st.image(img, caption="Uploaded Image", use_container_width=True)
     mask = predict_mask(img)
-    st.image(mask, caption="Predicted Mask", use_column_width=True, clamp=True)
+    st.image(mask, caption="Predicted Mask", use_container_width=True, clamp=True)
     # Optionally: Download mask
     mask_img = Image.fromarray((mask * 255).astype(np.uint8))
     st.download_button("Download Mask", data=mask_img.tobytes(), file_name="mask.png", mime="image/png")
