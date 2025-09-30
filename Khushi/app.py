@@ -13,7 +13,7 @@ from PIL import Image
 import numpy as np
 from io import BytesIO
 
-file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR/view?usp=sharing"  
+file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
 output_path = "best_unet_oilspill.pth"
 
 if not os.path.exists(output_path):
