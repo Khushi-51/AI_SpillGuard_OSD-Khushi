@@ -13,6 +13,13 @@ from PIL import Image
 import numpy as np
 from io import BytesIO
 
+try:
+    import numpy as np
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
+    import numpy as np
+
+
 file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
 output_path = "best_unet_oilspill.pth"
 
