@@ -1,63 +1,54 @@
 import os
+import streamlit as st
+from io import BytesIO
+from PIL import Image
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+import gdown
+import numpy as np
+
+# --- Environment variables for Torch distributed (optional) ---
 os.environ["TORCH_DISTRIBUTED_DEBUG"] = "OFF"
 os.environ["MASTER_ADDR"] = "localhost"
 os.environ["MASTER_PORT"] = "29500"
 
-import streamlit as st
-import numpy as np
-import torch
-import gdown 
-import torch.nn as nn
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-from PIL import Image
-
-from io import BytesIO
-
-try:
-    import numpy as np
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
-    import numpy as np
-
-
-file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
+# --- Google Drive model file ---
+file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"
 output_path = "best_unet_oilspill.pth"
 
 if not os.path.exists(output_path):
     url = f"https://drive.google.com/uc?id={file_id}"
     gdown.download(url, output_path, quiet=False)
 
-# --- UNet Model Architecture (same as training) ---
+# --- UNet Model Definition ---
 class DoubleConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_ch, out_ch):
         super().__init__()
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, 3, padding=1, bias=False),
-            nn.BatchNorm2d(out_channels),
+            nn.Conv2d(in_ch, out_ch, 3, padding=1, bias=False),
+            nn.BatchNorm2d(out_ch),
             nn.ReLU(inplace=True),
-            nn.Conv2d(out_channels, out_channels, 3, padding=1, bias=False),
-            nn.BatchNorm2d(out_channels),
+            nn.Conv2d(out_ch, out_ch, 3, padding=1, bias=False),
+            nn.BatchNorm2d(out_ch),
             nn.ReLU(inplace=True)
         )
     def forward(self, x):
         return self.conv(x)
 
 class Down(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_ch, out_ch):
         super().__init__()
-        self.maxpool_conv = nn.Sequential(
-            nn.MaxPool2d(2),
-            DoubleConv(in_channels, out_channels)
-        )
+        self.down = nn.Sequential(nn.MaxPool2d(2), DoubleConv(in_ch, out_ch))
     def forward(self, x):
-        return self.maxpool_conv(x)
+        return self.down(x)
 
 class Up(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_ch, out_ch):
         super().__init__()
-        self.up = nn.ConvTranspose2d(in_channels, in_channels // 2, 2, stride=2)
-        self.conv = DoubleConv(in_channels, out_channels)
+        self.up = nn.ConvTranspose2d(in_ch, in_ch // 2, 2, stride=2)
+        self.conv = DoubleConv(in_ch, out_ch)
     def forward(self, x1, x2):
         x1 = self.up(x1)
         diffY = x2.size(2) - x1.size(2)
@@ -90,23 +81,20 @@ class UNet(nn.Module):
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        logits = self.outc(x)
-        return logits
+        return self.outc(x)
 
-# --- Load Model ---
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# --- Load model ---
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = UNet(n_channels=3, n_classes=1).to(device)
-model.load_state_dict(torch.load(output_path, map_location="cpu"))  # <--- update path if needed
+model.load_state_dict(torch.load(output_path, map_location=device))
 model.eval()
 
-# --- Helper function: Overlay mask on image ---
+# --- Helper: Overlay mask ---
 def overlay_image(img, mask, alpha=0.4):
-    # Resize image to mask shape
     img = img.resize(mask.shape[::-1])
     mask_img = Image.fromarray((mask * 255).astype(np.uint8)).convert("RGBA")
     img = img.convert("RGBA")
-    overlay = Image.blend(img, mask_img, alpha)
-    return overlay
+    return Image.blend(img, mask_img, alpha)
 
 # --- Streamlit UI ---
 st.title("Oil Spill Segmentation Demo (U-Net)")
@@ -114,35 +102,35 @@ st.write("Upload a satellite image to detect oil spill area.")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-def predict_mask(pil_img, image_size=256):
+def predict_mask(pil_img, size=256):
     transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
+        transforms.Resize((size, size)),
         transforms.ToTensor(),
-        transforms.Normalize([0.485,0.456,0.406],[0.229,0.224,0.225])
+        transforms.Normalize([0.485, 0.456, 0.406],
+                             [0.229, 0.224, 0.225])
     ])
-    img_tensor = transform(pil_img).unsqueeze(0).to(device)
+    tensor = transform(pil_img).unsqueeze(0).to(device)
     with torch.no_grad():
-        output = model(img_tensor)
+        output = model(tensor)
         prob = torch.sigmoid(output)
-        pred_mask = (prob > 0.5).float().cpu().numpy()[0, 0]
-    return pred_mask
+        mask = (prob > 0.5).float().cpu().numpy()[0,0]
+    return mask
 
 if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_container_width=True)
+    
     mask = predict_mask(img)
     st.image(mask, caption="Predicted Mask", use_container_width=True, clamp=True)
     
-    # --- Overlay visualization ---
     overlay = overlay_image(img, mask)
     st.image(overlay, caption="Mask Overlay", use_container_width=True)
     
-    # --- Download mask ---
-    mask_img = Image.fromarray((mask * 255).astype(np.uint8))
+    # Download mask
+    mask_img = Image.fromarray((mask*255).astype(np.uint8))
     buf = BytesIO()
     mask_img.save(buf, format="PNG")
-    byte_im = buf.getvalue()
-    st.download_button("Download Mask", data=byte_im, file_name="mask.png", mime="image/png")
+    st.download_button("Download Mask", buf.getvalue(), file_name="mask.png", mime="image/png")
 
 st.markdown("---")
 st.write("Model by KhushiBadsra | Powered by Streamlit + PyTorch")
