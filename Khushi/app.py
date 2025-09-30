@@ -80,7 +80,7 @@ class UNet(nn.Module):
 # --- Load Model ---
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(n_channels=3, n_classes=1).to(device)
-model.load_state_dict(torch.load('../notebooks/results/best_unet_oilspill.pth', map_location=device))  # <--- update path if needed
+model.load_state_dict(torch.load('notebooks/results/best_unet_oilspill.pth', map_location=device))  # <--- update path if needed
 model.eval()
 
 # --- Helper function: Overlay mask on image ---
