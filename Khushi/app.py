@@ -4,13 +4,14 @@ os.environ["MASTER_ADDR"] = "localhost"
 os.environ["MASTER_PORT"] = "29500"
 
 import streamlit as st
+import numpy as np
 import torch
 import gdown 
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
-import numpy as np
+
 from io import BytesIO
 
 try:
