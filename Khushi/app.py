@@ -3,22 +3,17 @@ os.environ["TORCH_DISTRIBUTED_DEBUG"] = "OFF"
 os.environ["MASTER_ADDR"] = "localhost"
 os.environ["MASTER_PORT"] = "29500"
 
+import os
+import numpy as np 
 import streamlit as st
-import numpy as np
+from io import BytesIO
+from PIL import Image
 import torch
-import gdown 
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-from PIL import Image
+import gdown
 
-from io import BytesIO
-
-try:
-    import numpy as np
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy"])
-    import numpy as np
 
 
 file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
@@ -96,7 +91,7 @@ class UNet(nn.Module):
 # --- Load Model ---
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(n_channels=3, n_classes=1).to(device)
-model.load_state_dict(torch.load(output_path, map_location="cpu"))  # <--- update path if needed
+model.load_state_dict(torch.load(output_path, map_location=device))  
 model.eval()
 
 # --- Helper function: Overlay mask on image ---
