@@ -1,0 +1,24 @@
+{
+  "model_architecture": "SimpleUNet",
+  "loss_function": "Combined BCE + Dice Loss",
+  "optimizer": "Adam",
+  "learning_rate": 0.001,
+  "batch_size": 2,
+  "max_epochs": 50,
+  "evaluation_metrics": [
+    "IoU",
+    "Dice Coefficient",
+    "Precision",
+    "Recall",
+    "F1",
+    "False Alarm Rate"
+  ],
+  "best_model_path": "best_model.pth",
+  "device": "cpu",
+  "criteria": {
+    "target_iou": 0.6,
+    "target_f1": 0.7,
+    "max_false_alarm_rate": 0.1
+  },
+  "training_approach": "Flexible epochs with early stopping based on validation improvement plateau"
+}
