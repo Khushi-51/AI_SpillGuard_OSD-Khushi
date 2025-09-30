@@ -1,9 +1,7 @@
-
 import os
 os.environ["TORCH_DISTRIBUTED_DEBUG"] = "OFF"
 os.environ["MASTER_ADDR"] = "localhost"
 os.environ["MASTER_PORT"] = "29500"
-
 
 import streamlit as st
 import torch
@@ -12,6 +10,7 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
 import numpy as np
+from io import BytesIO
 
 # --- UNet Model Architecture (same as training) ---
 class DoubleConv(nn.Module):
@@ -84,6 +83,15 @@ model = UNet(n_channels=3, n_classes=1).to(device)
 model.load_state_dict(torch.load('../notebooks/results/best_unet_oilspill.pth', map_location=device))  # <--- update path if needed
 model.eval()
 
+# --- Helper function: Overlay mask on image ---
+def overlay_image(img, mask, alpha=0.4):
+    # Resize image to mask shape
+    img = img.resize(mask.shape[::-1])
+    mask_img = Image.fromarray((mask * 255).astype(np.uint8)).convert("RGBA")
+    img = img.convert("RGBA")
+    overlay = Image.blend(img, mask_img, alpha)
+    return overlay
+
 # --- Streamlit UI ---
 st.title("Oil Spill Segmentation Demo (U-Net)")
 st.write("Upload a satellite image to detect oil spill area.")
@@ -108,9 +116,17 @@ if uploaded_file is not None:
     st.image(img, caption="Uploaded Image", use_container_width=True)
     mask = predict_mask(img)
     st.image(mask, caption="Predicted Mask", use_container_width=True, clamp=True)
-    # Optionally: Download mask
+    
+    # --- Overlay visualization ---
+    overlay = overlay_image(img, mask)
+    st.image(overlay, caption="Mask Overlay", use_container_width=True)
+    
+    # --- Download mask ---
     mask_img = Image.fromarray((mask * 255).astype(np.uint8))
-    st.download_button("Download Mask", data=mask_img.tobytes(), file_name="mask.png", mime="image/png")
+    buf = BytesIO()
+    mask_img.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+    st.download_button("Download Mask", data=byte_im, file_name="mask.png", mime="image/png")
 
 st.markdown("---")
 st.write("Model by KhushiBadsra | Powered by Streamlit + PyTorch")
