@@ -112,9 +112,12 @@ def clean_mask(mask):
 def overlay_image_color(img, mask, color=(255,0,0), alpha=0.4):
     img = img.resize(mask.shape[::-1])
     img_np = np.array(img).astype(np.uint8)
-    mask_3c = np.stack([mask]*3, axis=-1)
+    mask = mask.astype(bool)
+    # Ensure img_np is HxWx3
+    if img_np.ndim == 2:
+        img_np = np.stack([img_np]*3, axis=-1)
     overlay = img_np.copy()
-    overlay[mask_3c == 1] = color
+    overlay[mask] = color
     blended = cv2.addWeighted(img_np, 1-alpha, overlay, alpha, 0)
     return Image.fromarray(blended)
 
