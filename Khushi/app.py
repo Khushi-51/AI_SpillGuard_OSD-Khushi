@@ -16,8 +16,8 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import gdown
 
-print("NumPy version:", np.__version__)
-print("Torch sees NumPy:", torch.tensor([1.0,2.0]).numpy())
+# print("NumPy version:", np.__version__)
+# print("Torch sees NumPy:", torch.tensor([1.0,2.0]).numpy())
 
 
 file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
@@ -97,6 +97,13 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = UNet(n_channels=3, n_classes=1).to(device)
 model.load_state_dict(torch.load(output_path, map_location=device))  
 model.eval()
+
+
+st.write("NumPy version:", np.__version__)
+try:
+    st.write("Torch can use NumPy:", torch.tensor([1.0,2.0]).numpy())
+except Exception as e:
+    st.warning(f"Torch-NumPy link not ready: {e}")
 
 # --- Helper function: Overlay mask on image ---
 def overlay_image(img, mask, alpha=0.4):
