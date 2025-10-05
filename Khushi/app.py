@@ -8,17 +8,12 @@ import numpy as np
 import streamlit as st
 from io import BytesIO
 from PIL import Image
-from io import BytesIO
-from PIL import Image
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 import gdown
-
-# print("NumPy version:", np.__version__)
-# print("Torch sees NumPy:", torch.tensor([1.0,2.0]).numpy())
-
+import cv2
 
 file_id = "1GrkMfHTY6-kqOthmWEYHVWYkPcoqCCkR"  
 output_path = "best_unet_oilspill.pth"
@@ -98,21 +93,30 @@ model = UNet(n_channels=3, n_classes=1).to(device)
 model.load_state_dict(torch.load(output_path, map_location=device))  
 model.eval()
 
-
 st.write("NumPy version:", np.__version__)
 try:
     st.write("Torch can use NumPy:", torch.tensor([1.0,2.0]).numpy())
 except Exception as e:
     st.warning(f"Torch-NumPy link not ready: {e}")
 
-# --- Helper function: Overlay mask on image ---
-def overlay_image(img, mask, alpha=0.4):
-    # Resize image to mask shape
+# --- Helper function: Clean mask using morphology ---
+def clean_mask(mask):
+    mask_uint8 = (mask * 255).astype(np.uint8)
+    kernel = np.ones((5,5), np.uint8)
+    mask_clean = cv2.morphologyEx(mask_uint8, cv2.MORPH_CLOSE, kernel)
+    mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_OPEN, kernel)
+    mask_clean = (mask_clean > 127).astype(np.uint8)
+    return mask_clean
+
+# --- Helper function: Overlay mask on image with color ---
+def overlay_image_color(img, mask, color=(255,0,0), alpha=0.4):
     img = img.resize(mask.shape[::-1])
-    mask_img = Image.fromarray((mask * 255).astype(np.uint8)).convert("RGBA")
-    img = img.convert("RGBA")
-    overlay = Image.blend(img, mask_img, alpha)
-    return overlay
+    img_np = np.array(img).astype(np.uint8)
+    mask_3c = np.stack([mask]*3, axis=-1)
+    overlay = img_np.copy()
+    overlay[mask_3c == 1] = color
+    blended = cv2.addWeighted(img_np, 1-alpha, overlay, alpha, 0)
+    return Image.fromarray(blended)
 
 # --- Streamlit UI ---
 st.title("Oil Spill Segmentation Demo (U-Net)")
@@ -137,14 +141,26 @@ if uploaded_file is not None:
     img = Image.open(uploaded_file).convert("RGB")
     st.image(img, caption="Uploaded Image", use_container_width=True)
     mask = predict_mask(img)
-    st.image(mask, caption="Predicted Mask", use_container_width=True, clamp=True)
+    mask_clean = clean_mask(mask)
+    st.image(mask_clean, caption="Cleaned Predicted Mask", use_container_width=True, clamp=True)
     
-    # --- Overlay visualization ---
-    overlay = overlay_image(img, mask)
-    st.image(overlay, caption="Mask Overlay", use_container_width=True)
+    # --- Oil spill alert ---
+    spill_pixels = np.sum(mask_clean == 1)
+    total_pixels = mask_clean.size
+    spill_percent = (spill_pixels / total_pixels) * 100
+    THRESHOLD = 2.0  # Adjust as needed
+
+    if spill_percent > THRESHOLD:
+        st.success(f"⚠️ Oil spill detected! ({spill_percent:.2f}% of area)")
+    else:
+        st.info(f"No significant oil spill detected. ({spill_percent:.2f}% of area)")
+
+    # --- Overlay visualization (red color for spill) ---
+    overlay = overlay_image_color(img, mask_clean, color=(255,0,0), alpha=0.4)
+    st.image(overlay, caption="Oil Spill Overlay (Red)", use_container_width=True)
     
     # --- Download mask ---
-    mask_img = Image.fromarray((mask * 255).astype(np.uint8))
+    mask_img = Image.fromarray((mask_clean * 255).astype(np.uint8))
     buf = BytesIO()
     mask_img.save(buf, format="PNG")
     byte_im = buf.getvalue()
