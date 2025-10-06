@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import os
+
+
 import tensorflow.keras.backend as K
 from tensorflow.keras.metrics import BinaryAccuracy, MeanIoU
 
@@ -37,21 +39,18 @@ custom_objects = {
 
 # Define the path to the saved model
 # Make sure this path is accessible in your deployment environment
-best_model_path = 'https://drive.google.com/file/d/1khwzEpt6oYbb7FQATGqyJ6slXSbyqfOF/view?usp=drive_link'
+best_model_path = "Khushi/models/best_oil_spill_model.keras"
 
 # Define target dimensions (should match the dimensions used for training)
 IMG_WIDTH = 256
 IMG_HEIGHT = 256
 
 # Load the trained model (use st.cache_resource for efficiency)
-@st.cache_resource
-def load_model(model_path, custom_obj):
-    try:
-        model = tf.keras.models.load_model(model_path, custom_objects=custom_obj)
-        return model
-    except Exception as e:
-        st.error(f"Error loading the model: {e}")
-        return None
+
+def load_model(best_model_path, _custom_obj):
+    from tensorflow.keras.models import load_model as keras_load_model
+    model = keras_load_model(best_model_path, custom_objects=_custom_obj)
+    return model
 
 oil_spill_model = load_model(best_model_path, custom_objects)
 
@@ -63,7 +62,7 @@ uploaded_file = st.file_uploader("Upload a satellite image...", type=["jpg", "jp
 if uploaded_file is not None:
     # Display the uploaded image
     image = Image.open(uploaded_file)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+    st.image(image, caption="Uploaded Image", use_container_width=True)
 
     if st.button("Detect Oil Spill"):
         if oil_spill_model is not None:
@@ -84,14 +83,14 @@ if uploaded_file is not None:
 
                 # Display the predicted mask
                 mask_img = Image.fromarray(predicted_mask * 255, mode='L') # Scale to 0-255 for grayscale image
-                st.image(mask_img, caption="Predicted Oil Spill Mask", use_column_width=True)
+                st.image(mask_img, caption="Predicted Oil Spill Mask", use_container_width=True)
 
                 # Optional: Overlay the mask on the original image for better visualization
                 original_img_rgb = image.convert('RGB').resize((IMG_WIDTH, IMG_HEIGHT))
                 overlay = np.zeros_like(np.array(original_img_rgb), dtype=np.uint8)
                 overlay[predicted_mask == 1] = [255, 0, 0] # Red color for predicted oil spill
                 blended_image = Image.blend(original_img_rgb, Image.fromarray(overlay, mode='RGB'), alpha=0.5)
-                st.image(blended_image, caption="Predicted Mask Overlay", use_column_width=True)
+                st.image(blended_image, caption="Predicted Mask Overlay", use_container_width=True)
 
 
             except Exception as e:
