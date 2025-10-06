@@ -36,7 +36,7 @@ custom_objects = {
 
 # --- Paths ---
 file_id = "1khwzEpt6oYbb7FQATGqyJ6slXSbyqfOF"
-best_model_path = "oil_spill_model.keras"
+best_model_path = "best_oil_spill_model.keras"
 
 if not os.path.exists(best_model_path):
     gdown.download(f"https://drive.google.com/uc?id={file_id}", best_model_path, quiet=False)
