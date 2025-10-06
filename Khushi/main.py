@@ -42,10 +42,9 @@ if not os.path.exists(best_model_path):
     gdown.download(f"https://drive.google.com/uc?id={file_id}", best_model_path, quiet=False)
 
 # --- Load model ---
-@st.cache_resource
-def load_model(path, custom_objects):
+def load_model(best_model_path, _custom_objects):
     from tensorflow.keras.models import load_model as keras_load_model
-    return keras_load_model(path, custom_objects=custom_objects)
+    return keras_load_model(best_model_path, custom_objects=_custom_objects)
 
 oil_spill_model = load_model(best_model_path, custom_objects)
 
