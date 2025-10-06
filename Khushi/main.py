@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import os
-
 import tensorflow.keras.backend as K
 from tensorflow.keras.metrics import BinaryAccuracy, MeanIoU
 
@@ -38,7 +37,7 @@ custom_objects = {
 
 # Define the path to the saved model
 # Make sure this path is accessible in your deployment environment
-best_model_path = 'https://drive.google.com/file/d/1khwzEpt6oYbb7FQATGqyJ6slXSbyqfOF/view?usp=sharing'
+best_model_path = 'https://drive.google.com/file/d/1khwzEpt6oYbb7FQATGqyJ6slXSbyqfOF/view?usp=drive_link'
 
 # Define target dimensions (should match the dimensions used for training)
 IMG_WIDTH = 256
@@ -74,7 +73,7 @@ if uploaded_file is not None:
                 img_gray = img_gray.resize((IMG_WIDTH, IMG_HEIGHT))
                 img_array = np.array(img_gray)
                 img_input = np.expand_dims(img_array / 255.0, axis=0)  # Normalize and add batch dimension
-                img_input = np.expand_dims(img_input, axis=-1)  # Add channel dimension
+                img_input = np.expand_dims(img_input, axis=-1)  # Add channel dimension for grayscale
 
                 # Perform inference
                 predictions = oil_spill_model.predict(img_input)
