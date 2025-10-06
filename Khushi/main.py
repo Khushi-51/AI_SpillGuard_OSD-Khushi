@@ -31,8 +31,8 @@ custom_objects = {
     'combined_loss': combined_loss,
     'dice_loss': dice_loss,
     'dice_coef_metric': dice_coef_metric,
-    'BinaryAccuracy': BinaryAccuracy(),  
-    'MeanIoU': MeanIoU(num_classes=2)
+    'BinaryAccuracy': BinaryAccuracy,
+    'MeanIoU': MeanIoU
 }
 
 # --- Paths ---
@@ -49,7 +49,7 @@ def load_model_cached(best_model_path, custom_objects):
     from tensorflow.keras.models import load_model as keras_load_model
     return keras_load_model(best_model_path, custom_objects=custom_objects)
 
-oil_spill_model = load_model_cached(best_model_path, custom_objects)
+oil_spill_model = load_model_cached(best_model_path, custom_objects,compile=False)
 
 # --- Streamlit UI ---
 st.title("Oil Spill Detection App")
