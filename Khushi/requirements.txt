@@ -6,25 +6,29 @@ seaborn>=0.11.0
 pillow>=8.3.0
 gdown>=4.7.1
 
-# Use CPU versions of PyTorch to reduce size and avoid GPU dependencies
+# TensorFlow (CPU version to avoid GPU dependencies)
+tensorflow==2.13.0
+
+# Use CPU versions of PyTorch
 torch==2.0.1+cpu
 torchvision==0.15.2+cpu
 --extra-index-url https://download.pytorch.org/whl/cpu
 
+# OpenCV and image processing
 opencv-python-headless>=4.5.0
 scikit-image>=0.18.0
-scikit-learn>=1.0.0
-streamlit>=1.25.0
-
-# Jupyter and visualization
-jupyter>=1.0.0
-ipywidgets>=7.6.0
-plotly>=5.0.0
-
-# Image processing and augmentation
 albumentations>=1.1.0
 imageio>=2.9.0
 
-# Progress bars and utilities
+# Machine learning
+scikit-learn>=1.0.0
+
+# Streamlit and visualization
+streamlit>=1.25.0
+plotly>=5.0.0
+jupyter>=1.0.0
+ipywidgets>=7.6.0
+
+# Utilities
 tqdm>=4.62.0
 pathlib2>=2.3.0
