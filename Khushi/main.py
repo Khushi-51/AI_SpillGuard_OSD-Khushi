@@ -39,7 +39,7 @@ custom_objects = {
 
 # Define the path to the saved model
 # Make sure this path is accessible in your deployment environment
-best_model_path = "Khushi/models/best_oil_spill_model.keras"
+best_model_path = "https://drive.google.com/file/d/1khwzEpt6oYbb7FQATGqyJ6slXSbyqfOF/view?usp=sharing"
 
 # Define target dimensions (should match the dimensions used for training)
 IMG_WIDTH = 256
